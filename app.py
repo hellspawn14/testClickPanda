@@ -1,11 +1,13 @@
 import os
-from flask import Flask, request, jsonify, render_template, abort
+from flask import Flask, request, jsonify, render_template, abort, make_response
 import hashlib
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import update, func
 from datetime import date, datetime
+import codecs
 import json
 import jwt
+import csv
 
 app = Flask(__name__)
 
@@ -143,7 +145,25 @@ def obtener_historial():
                 'date_last_modified': element.date_last_modified.strftime("%Y/%m/%d %H:%M:%S"), 
                 'date_created': element.date_created.strftime("%Y/%m/%d %H:%M:%S")
             })
-        return jsonify(result_set)
+        
+        # user_history_parsed = json.loads(result_set)
+        # open a file for writing
+        csv_file = open('file.csv', 'w')
+        # create the csv writer object
+        csvwriter = csv.writer(csv_file)
+        count = 0
+        for r in result_set:
+            if count == 0:
+                    header = r.keys()
+                    csvwriter.writerow(header)
+                    count += 1
+            csvwriter.writerow(r.values())
+
+        csv_file.close()
+        file_data = codecs.open('file.csv', 'rb').read()
+        response = make_response()
+        response.data = file_data
+        return response, 201
 
 
 @app.route("/obtener_num_correos", methods = ['POST'])

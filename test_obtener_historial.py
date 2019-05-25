@@ -58,8 +58,7 @@ class obtener_historial_campanias_test(unittest.TestCase):
             time.sleep(5) 
         
         response = self.obtener_historial(user_email)
-        message = json.loads(response.text)
-        self.assertEqual('XXXX', message)
+        self.assertEqual(response.status_code, 201)
 
    
 if __name__ == "__main__":
